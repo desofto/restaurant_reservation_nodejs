@@ -25,7 +25,7 @@ sass.render({
 MongoClient.connect(db.url, (err, client) => {
   if (err) throw err
 
-  let db = client.db('restaurant_reservation')
+  let db = client.db('restaurant_reservation_nodejs')
 
   db.collection('users').remove({})
 
