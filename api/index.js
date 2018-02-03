@@ -1,4 +1,4 @@
-module.exports = (router, db) => {
-  require('./users')(router, db)
+module.exports = (router) => {
+  require('./users')(router)
   require('./static')(router)
 }

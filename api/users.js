@@ -1,71 +1,60 @@
-module.exports = (router, db) => {
-  const crypto = require('crypto')
-  const ObjectID = require('mongodb').ObjectID
+const auth = require('../helpers/auth')
+const Users = require('../models/users')
+const db = require('../helpers/mongodb').db
 
-  router.get('/api/v1/users', (req, res) => {
-    let token = req.query.token
-    db.collection('users').findOne({ token: token }, (err, user) => {
-      if(err || !user) return res.status(401).send('Wrong token')
-
-      db.collection('users').find({}).toArray((err, users) => {
-        if(err) return res.status(500).send(err)
-
-        res.json(users.map(user => {
-          return {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role
-          }
-        }))
+module.exports = (router) => {
+  router.get('/api/v1/users', auth.isAuthenticated, (req, res) => {
+    Users.all().then(users => {
+      users = users.map(user => {
+        return {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
       })
+
+      res.json(users)
+    }, (err) => {
+      res.status(500).send(err)
     })
   })
 
-  router.delete('/api/v1/users/:id', (req, res) => {
-    let token = req.query.token
-    db.collection('users').findOne({ token: token }, (err, user) => {
-      if(err || !user) return res.status(401).send('Wrong token')
-
-      db.collection('users').deleteOne({ _id: new ObjectID(user._id) }, (err, obj) => {
-        if(err) return res.status(422).send(err)
-
-        res.send('ok')
-      })
+  router.delete('/api/v1/users/:id', auth.isAuthenticated, (req, res) => {
+    Users.destroy(req.params.id).then(() => {
+      res.send('ok')
+    }, err => {
+      res.status(422).send(err)
     })
   })
 
   router.post('/api/v1/users', (req, res) => {
-    let pwd = crypto.createHash('sha256').update(req.body.password).digest('base64')
-
-    db.collection('users').findOne({ email: req.body.email, password: pwd }, (err, user) => {
-      if(err) return res.status(401).send('Wrong email and/or password')
-
-      crypto.randomBytes(48, (err, buffer) => {
-        user.token = buffer.toString('hex')
-        db.collection('users').update({ _id: new ObjectID(user._id) }, user, (err, result) => {
-          if(err) res.status(500).send(err)
-
+    Users.find({ email: req.body.email, password: Users.encrypt(req.body.password) }).then(user => {
+      Users.token().then(token => {
+        user.token = token
+        Users.update(user).then(() => {
           res.json({
             id: user._id,
             email: user.email,
             role: user.role,
             token: user.token
           })
+        }, err => {
+          res.status(500).send(err)
         })
       })
+    }, err => {
+      res.status(401).send('Wrong email and/or password')
     })
   })
 
-  router.post('/api/v1/users/logout', (req, res) => {
-    let token = req.query.token
-    db.collection('users').findOne({ token: token }, (err, user) => {
-      if(err || !user) return
-
-      crypto.randomBytes(48, (err, buffer) => {
-        user.token = buffer.toString('hex')
-        db.collection('users').update({ _id: new ObjectID(user._id) }, user)
+  router.post('/api/v1/users/logout', auth.isAuthenticated, (req, res) => {
+    User.find({ token: req.params.token }).then(user => {
+      Users.token().then(token => {
+        user.token = token
+        User.update(user)
       })
+    }, () => {
     })
     res.send('ok')
   })

@@ -1,17 +1,26 @@
-const common = require('./webpack.common.js')
+const config = require('./webpack.common.js')
+const NodemonPlugin = require('nodemon-webpack-plugin')
 const path = require('path')
 
-module.exports = Object.assign(common, {
+config.plugins.push(
+  new NodemonPlugin({
+    watch: [
+      path.resolve('./server.js'),
+      path.resolve('./router.js'),
+      path.resolve('./api'),
+      path.resolve('./helpers'),
+      path.resolve('./models')
+    ],
+    script: './server.js'
+  })
+)
+
+module.exports = Object.assign(config, {
   devtool: '#inline-source-map',
 
   devServer: {
     contentBase: 'public',
     port: 3000,
-
-    after(app){
-      process.env.PORT = 8080
-      require('./server')
-    },
 
     proxy: {
       "/api/*": {

@@ -1,4 +1,4 @@
-module.exports = (app, db) => {
+module.exports = (app) => {
   const express = require('express')
   const router = express.Router()
 
@@ -7,7 +7,7 @@ module.exports = (app, db) => {
     next()
   })
 
-  require('./api/index')(router, db)
+  require('./api/index')(router)
 
   app.use("/", router)
 
