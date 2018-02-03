@@ -13,8 +13,8 @@ module.exports = (app, db) => {
 
   const map = {
     '/': 'public/index.html',
-    '/admin.*': 'public/admin.html',
-    '/user.*': 'public/user.html',
+    '/admin.*': 'public/admin/index.html',
+    '/user.*': 'public/user/index.html',
     '/bootstrap.min.js.map': 'node_modules/bootstrap/dist/js/bootstrap.min.js.map',
     '/fonts/fontawesome-webfont.*': 'node_modules/font-awesome*'
   }
