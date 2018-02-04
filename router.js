@@ -9,6 +9,8 @@ module.exports = (app) => {
 
   require('./api/index')(router)
 
+  router.use(express.static(__dirname + '/../public'))
+
   app.use("/", router)
 
   const map = {
@@ -25,24 +27,20 @@ module.exports = (app) => {
     let path = req.originalUrl.split('?')[0]
     let mapped_path = map[path]
 
-    let found = false
-    Object.keys(map).forEach(key => {
-      if(path.match(`^${key}$`)) {
-        found = true
-        let mapped_path = map[key]
-        if(mapped_path[mapped_path.length-1] == '*') {
-          mapped_path = mapped_path.slice(0, mapped_path.length-1) + path
-        }
-        return res.sendFile(`${__dirname}/${mapped_path}`)
-      }
+    let key = Object.keys(map).find(key => {
+      return path.match(`^${key}$`)
     })
-    if(found) return
+
+    if(key) {
+      let mapped_path = map[key]
+      if(mapped_path[mapped_path.length-1] == '*') {
+        mapped_path = mapped_path.slice(0, mapped_path.length-1) + path
+      }
+      return res.sendFile(`${__dirname}/${mapped_path}`)
+    }
 
     fs.readFile(`./node_modules${path}/package.json`, (error, data) => {
-      if(error) {
-        res.status(404).send('Not Found')
-        return console.log(error)
-      }
+      if(error) return res.status(404).send('Not Found')
 
       let pkg = JSON.parse(data)
 
