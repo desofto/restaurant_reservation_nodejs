@@ -1,19 +1,11 @@
 const auth = require('../helpers/auth')
-const Users = require('../models/users')
+const { Users, User } = require('../models/users')
 const db = require('../helpers/mongodb').db
 
 module.exports = (router) => {
   router.get('/api/v1/users', auth.isAuthenticated, (req, res) => {
     Users.all().then(users => {
-      users = users.map(user => {
-        return {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role
-        }
-      })
-
+      users = users.map(user => new User(user).json)
       res.json(users)
     }, (err) => {
       res.status(500).send(err)
@@ -33,12 +25,7 @@ module.exports = (router) => {
       Users.token().then(token => {
         user.token = token
         Users.update(user).then(() => {
-          res.json({
-            id: user._id,
-            email: user.email,
-            role: user.role,
-            token: user.token
-          })
+          res.json(new User(user).with_token().json)
         }, err => {
           res.status(500).send(err)
         })
@@ -49,10 +36,10 @@ module.exports = (router) => {
   })
 
   router.post('/api/v1/users/logout', auth.isAuthenticated, (req, res) => {
-    User.find({ token: req.params.token }).then(user => {
+    Users.find({ token: req.params.token }).then(user => {
       Users.token().then(token => {
         user.token = token
-        User.update(user)
+        Users.update(user)
       })
     }, () => {
     })

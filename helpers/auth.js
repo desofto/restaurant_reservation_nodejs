@@ -1,4 +1,4 @@
-const Users = require('../models/users')
+const { Users } = require('../models/users')
 
 function notAuthenticated(res) {
   res.status(401).json({ status: 'error', error: 'Not Authorized.' })

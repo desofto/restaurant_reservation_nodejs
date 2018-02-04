@@ -14,7 +14,7 @@ const cors = require('cors')
 app.use(cors())
 
 require('./helpers/mongodb').connect().then(() => {
-  // require('./models/users').seed()
+  //require('./models/users').Users.seed()
 
   require('./router')(app)
 
