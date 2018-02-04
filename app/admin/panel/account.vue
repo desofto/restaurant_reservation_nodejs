@@ -50,7 +50,11 @@
       this.$http.get('/api/v1/users?token=' + this.user.token).then(response => {
         this.users = response.body
       }, (error) => {
-        this.error = error.body.errors
+        if(error.status == 401) {
+          this.$parent.$emit('logout')
+        } else {
+          this.error = error.body
+        }
       })
     },
 
@@ -60,7 +64,11 @@
           let index = this.users.indexOf(user)
           this.users.splice(index, 1)
         }, (error) => {
-          this.error = error.body.errors
+          if(error.status == 401) {
+            this.$parent.$emit('logout')
+          } else {
+            this.error = error.body
+          }
         })
       }
     }

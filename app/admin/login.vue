@@ -73,7 +73,7 @@
         this.$http.post('/api/v1/users', data).then(response => {
           this.$emit('login', response.body)
         }, (error) => {
-          this.error(error.body.errors)
+          this.error(error.body)
         })
       },
 

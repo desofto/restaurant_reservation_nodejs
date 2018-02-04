@@ -61,7 +61,11 @@
         this.$http.get('/api/v1/schedule?token=' + this.user.token).then(response => {
           this.schedule = response.body
         }, (error) => {
-          this.error = error.body.errors
+          if(error.status == 401) {
+            this.$parent.$emit('logout')
+          } else {
+            this.error = error.body
+          }
         })
       }
     }

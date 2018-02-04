@@ -105,7 +105,7 @@
         this.$http.post('/api/v1/reservations', data).then(response => {
           this.checkout(response.data)
         }, error => {
-          alert(error.body.errors)
+          alert(error.body)
         })
       },
 
@@ -120,7 +120,7 @@
             self.$http.post(`/api/v1/reservations/${reservation.id}/pay`, { token: token.id }).then(response => {
               alert('Reserved')
             }, error => {
-              alert(error.body.errors)
+              alert(error.body)
             })
           }
         })

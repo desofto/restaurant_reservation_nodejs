@@ -1,7 +1,7 @@
 const { Users } = require('../models/users')
 
 function notAuthenticated(res) {
-  res.status(401).json({ status: 'error', error: 'Not Authorized.' })
+  res.status(401).send('Not Authorized.')
 }
 
 module.exports = {
