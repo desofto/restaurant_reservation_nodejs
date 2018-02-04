@@ -21,27 +21,17 @@ module.exports = (router) => {
   })
 
   router.post('/api/v1/users', (req, res) => {
-    Users.find({ email: req.body.email, password: Users.encrypt(req.body.password) }).then(user => {
-      Users.token().then(token => {
-        user.token = token
-        Users.update(user).then(() => {
-          res.json(new User(user).with_token().json)
-        }, err => {
-          res.status(500).send(err)
-        })
-      })
+    Users.authenticate(req.body.email, req.body.password).then(user => {
+      res.json(new User(user).with_token().json)
     }, err => {
-      res.status(401).send('Wrong email and/or password')
+      res.status(401).send(err)
     })
   })
 
   router.post('/api/v1/users/logout', auth.isAuthenticated, (req, res) => {
     Users.find({ token: req.params.token }).then(user => {
-      Users.token().then(token => {
-        user.token = token
-        Users.update(user)
-      })
-    }, () => {
+      Users.reset_token(user)
+    }, err => {
     })
     res.send('ok')
   })

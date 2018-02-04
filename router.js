@@ -27,9 +27,7 @@ module.exports = (app) => {
     let path = req.originalUrl.split('?')[0]
     let mapped_path = map[path]
 
-    let key = Object.keys(map).find(key => {
-      return path.match(`^${key}$`)
-    })
+    let key = Object.keys(map).find(key => path.match(`^${key}$`))
 
     if(key) {
       let mapped_path = map[key]

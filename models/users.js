@@ -9,12 +9,10 @@ class Users extends Model {
   static seed() {
     this.collection.remove({})
 
-    let pwd = crypto.createHash('sha256').update('QWEqwe123').digest('base64')
-
     this.collection.insert({
       name: 'Dmitry',
       email: 'test@gmail.com',
-      password: pwd,
+      password: Users.encrypt('QWEqwe123'),
       role: 'admin'
     })
   }
@@ -23,10 +21,29 @@ class Users extends Model {
     return crypto.createHash('sha256').update(password).digest('base64')
   }
 
-  static token() {
+  static reset_token(user) {
     return new Promise((resolve, reject) => {
       crypto.randomBytes(48, (err, buffer) => {
-        resolve(buffer.toString('hex'))
+        user.token = buffer.toString('hex')
+        Users.update(user).then(() => {
+          resolve(user)
+        }, error => {
+          reject(error)
+        })
+      })
+    })
+  }
+
+  static authenticate(email, password) {
+    return new Promise((resolve, reject) => {
+      Users.find({ email: email, password: Users.encrypt(password) }).then(user => {
+        Users.reset_token(user).then(user => {
+          resolve(user)
+        }, error => {
+          reject(error)
+        })
+      }, error => {
+        reject('Wrong email and/or password')
       })
     })
   }
