@@ -9,7 +9,7 @@ module.exports = (app) => {
 
   require('./api/index')(router)
 
-  router.use(express.static(__dirname + '/../public'))
+  router.use(express.static(__dirname + '/public'))
 
   app.use("/", router)
 
